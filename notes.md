@@ -9,7 +9,7 @@ Testing on Ubuntu 18.04 with ROS melodic.  Install as many packages as possible:
  sudo apt install ros-melodic-moveit*
  ```
  
- ### dVRK PSM
+### dVRK PSM
  
 Install dVRK code from https://github.com/jhu-dvrk/sawIntuitiveResearchKit/wiki/CatkinBuild
  
