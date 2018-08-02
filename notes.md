@@ -21,7 +21,7 @@ roslaunch moveit_setup_assistant setup_assistant.launch
 ```
 
 **Step 1:** Select **Create New MoveIt Configuration Package**.
-In **Load a URDF...*, browse to find `PSM1.urdf.xacro` then **Load Files**.  Older
+In **Load a URDF...**, browse to find `PSM1.urdf.xacro` then **Load Files**.  Older
 versions of MoveIt didn't support xacro but this seems to be supported now.
 
 **Step 2:** Generate Self Collision Matrix.  Since the PSM can't really hit itself, 
