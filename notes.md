@@ -37,9 +37,12 @@ group called `psm1_gripper` with all the `jaw` joints.
 
 To save the configuration files, use package name `dvrk_psm1_moveit_config`.
 Then remember to build the workspace and source your `setup.bash`:
+```sh
+catkin build
+source ~/catkin_ws/devel/setup.bash
 ```
 
-To test the configuration files, launcg RViz:
+To test the configuration files, launch RViz:
 ```sh
 roslaunch dvrk_psm1_moveit_config demo.launch
 ```
