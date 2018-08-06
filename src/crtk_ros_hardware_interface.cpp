@@ -1,6 +1,8 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-    */
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
+#include <controller_manager/controller_manager.h>
+
 #include <ros-control-crtk-ros-hw/crtk_ros_hardware_interface.h>
 
 namespace ros_control_crtk {
@@ -186,12 +188,29 @@ namespace ros_control_crtk {
 
     void crtkROSHardwareInterface::write(void)
     {
-        
+
         // if (velocity_interface_running_) {
         //     robot_->setSpeed(cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5],  max_vel_change_*125);
         // } else if (position_interface_running_) {
         //     robot_->servoj(mServoJP);
         // }
+    }
+
+    void crtkROSHardwareInterface::loop(void)
+    {
+        controller_manager::ControllerManager * cm
+            = new controller_manager::ControllerManager(this, m_node_handle);
+
+        ros::Time previous_time = ros::Time::now();
+		while (ros::ok()) {
+            this->read();
+			ros::Time now = ros::Time::now();
+			cm->update(now, now - previous_time);
+			previous_time = now;
+			this->write();
+        }
+
+        delete cm;
     }
 
     bool crtkROSHardwareInterface::canSwitch(const std::list<hardware_interface::ControllerInfo> & start_list,

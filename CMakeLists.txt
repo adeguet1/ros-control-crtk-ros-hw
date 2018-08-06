@@ -20,7 +20,15 @@ find_package (catkin REQUIRED COMPONENTS
 
 catkin_package (
   INCLUDE_DIRS include
-  CATKIN_DEPENDS hardware_interface controller_manager actionlib control_msgs geometry_msgs roscpp sensor_msgs trajectory_msgs
+  CATKIN_DEPENDS
+    hardware_interface
+    controller_manager
+    actionlib
+    control_msgs
+    geometry_msgs
+    roscpp
+    sensor_msgs
+    trajectory_msgs
 )
 
 ## Specify additional locations of header files
@@ -34,35 +42,15 @@ target_link_libraries (ros_control_crtk_ros_hw
                        ${catkin_LIBRARIES})
 
 # main executable, i.e. ROS node
-#set(${PROJECT_NAME}_SOURCES
-#    src/ur_ros_wrapper.cpp
-#    src/ur_driver.cpp
-#    src/ur_realtime_communication.cpp
-#    src/ur_communication.cpp
-#    src/robot_state.cpp
-#    src/robot_state_RT.cpp
-#    src/do_output.cpp)
-#add_executable(ur_driver ${${PROJECT_NAME}_SOURCES})
+add_executable (crtk_ros_hw_controller src/crtk_ros_hw_controller.cpp)
+target_link_libraries (crtk_ros_hw_controller ros_control_crtk_ros_hw ${catkin_LIBRARIES})
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-#add_dependencies (ur_driver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# install
+install (DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+install (DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
 
-## Specify libraries to link a library or executable target against
-# target_link_libraries(ur_driver
-#  ur_hardware_interface
-#  ${catkin_LIBRARIES}
-# )
-
-#############
-## Install ##
-#############
-
-install (DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
-install (DIRECTORY config/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
-
-## Mark executables and/or libraries for installation
-install (TARGETS ros_control_crtk_ros_hw #--------------------------- add executable here
+# install executables and/or libraries
+install (TARGETS ros_control_crtk_ros_hw crtk_ros_hw_controller
          LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
          RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
