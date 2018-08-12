@@ -31,8 +31,8 @@ namespace ros_control_crtk {
 
         // check that we have a valid vector of names
         if (measured_js.name.size() == 0) {
-            ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                            "measured_js must have a valid vector of joint names");
+            ROS_WARN_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
+                                           "measured_js must have a valid vector of joint names, still waiting for crtk node");
             m_crtk_node_found = false;
         }
         m_number_of_joints = measured_js.name.size();
@@ -172,6 +172,8 @@ namespace ros_control_crtk {
 
     void crtkROSHardwareInterface::init(void)
     {
+        m_crtk_node_found = false;
+
         // add subscriber to get joint state from crtk node
         m_measured_js_subscriber = m_node_handle.subscribe("measured_js", 1,
                                                            &crtkROSHardwareInterface::measured_js_callback, this);
@@ -208,6 +210,8 @@ namespace ros_control_crtk {
 			cm->update(now, now - previous_time);
 			previous_time = now;
 			this->write();
+
+            // there should be some kind of sleep here, maybe try to find frenquency of crtk node
         }
 
         delete cm;
@@ -216,6 +220,7 @@ namespace ros_control_crtk {
     bool crtkROSHardwareInterface::canSwitch(const std::list<hardware_interface::ControllerInfo> & start_list,
                                              const std::list<hardware_interface::ControllerInfo> & stop_list) const
     {
+        std::cerr << " canSwitch " << std::endl;
         for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
                  start_list.begin(); controller_it != start_list.end();
              ++controller_it) {
@@ -287,6 +292,7 @@ namespace ros_control_crtk {
     void crtkROSHardwareInterface::doSwitch(const std::list<hardware_interface::ControllerInfo> & start_list,
                                             const std::list<hardware_interface::ControllerInfo> & stop_list)
     {
+        std::cerr << " doSwitch " << std::endl;
         for (std::list<hardware_interface::ControllerInfo>::const_iterator controller_it =
                  stop_list.begin(); controller_it != stop_list.end();
              ++controller_it) {
