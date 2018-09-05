@@ -9,18 +9,19 @@ using namespace ros_control_crtk;
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "crtk_ros_hw_controller");
-	ros::NodeHandle node_handle;
+    ros::init(argc, argv, "crtk_ros_hw_controller");
+    ros::NodeHandle node_handle;
 
     crtkROSHardwareInterface crtk_ros_interface(node_handle);
     std::thread * hardware_thread =
         new std::thread(boost::bind(&crtkROSHardwareInterface::loop, &crtk_ros_interface));
 
-	ros::AsyncSpinner spinner(3);
-	spinner.start();
+    ros::AsyncSpinner spinner(3);
+    spinner.start();
 
-	ros::waitForShutdown();
+    ros::waitForShutdown();
 
-    // hardware_thread.halt();
-	exit(0);
+    delete hardware_thread;
+
+    exit(0);
 }

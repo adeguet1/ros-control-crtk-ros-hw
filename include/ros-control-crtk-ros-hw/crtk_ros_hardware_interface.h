@@ -41,18 +41,17 @@ namespace ros_control_crtk {
 
         ros::NodeHandle m_node_handle;
         bool m_crtk_node_found;
+        bool m_servo_jp_interface_running;
 
         ros::Subscriber m_measured_js_subscriber;
         ros::Publisher m_servo_jp_publisher;
 
         hardware_interface::JointStateInterface m_joint_state_interface;
         hardware_interface::PositionJointInterface m_position_joint_interface;
-        hardware_interface::VelocityJointInterface m_velocity_joint_interface;
 
         std::size_t m_number_of_joints;
         sensor_msgs::JointState m_measured_js; // joint state
         sensor_msgs::JointState m_servo_jp;    // commanded/servo joint position
-        sensor_msgs::JointState m_servo_jv;
     };
 
 }
