@@ -46,3 +46,18 @@ To test the configuration files, launch RViz:
 ```sh
 roslaunch dvrk_psm1_moveit_config demo.launch
 ```
+
+### ros control with crtk hw interface
+
+Code is under git: 
+
+To start testing, there is a launch file with dVRK console PSM1 in simulation mode, RViz and crtk controller:
+```sh
+roslaunch dvrk_psm1_moveit_config dvrk_psm1_sim_moveit_rviz.launch
+```
+
+To switch controller (not working yet!, maybe something related to controllers.yaml):
+```sh
+rosservice call /dvrk/PSM1/controller_manager/list_controller_types "{}" 
+rosservice call /dvrk/PSM1/controller_manager/switch_controller
+ ```
