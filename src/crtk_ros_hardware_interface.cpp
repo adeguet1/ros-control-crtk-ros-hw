@@ -28,91 +28,59 @@ namespace ros_control_crtk {
         // let's assume everything is going to work
         m_crtk_node_found = true;
 
-        // check that we have a valid vector of names
-        if (measured_js.name.size() == 0) {
-            ROS_WARN_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                           "measured_js must have a valid vector of joint names, still waiting for crtk node");
-            m_crtk_node_found = false;
+        // check all the vectors size
+        // -- name
+        {
+            const size_t name_size = measured_js.name.size();
+            if ((name_size != m_number_of_joints)
+                && (name_size != 0)) {
+                ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
+                                                "measured_js.name vector has wrong size");
+                m_crtk_node_found = false;
+            }
+            // check that the joint names are correct
+            for (size_t i = 0;
+                 i < name_size;
+                 ++i) {
+                if (measured_js.name[i] != m_measured_js.name[i]) {
+                    ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
+                                                    "measured_js.name vector doesn't match with the expected one");
+                    m_crtk_node_found = false;
+                }
+            }
         }
-        m_number_of_joints = measured_js.name.size();
-        m_measured_js.name.resize(m_number_of_joints);
-        // copy names only the first time, we don't support name/size change at runtime
-        std::copy(measured_js.name.begin(), measured_js.name.end(),
-                  m_measured_js.name.begin());
-        // resize all other vectors assuming sizes are correct
         // -- position
         {
             const size_t position_size = measured_js.position.size();
-            if (position_size == m_number_of_joints) {
-                m_measured_js.position.resize(m_number_of_joints);
-            } else if (position_size != 0) {
+            if ((position_size != m_number_of_joints)
+                && (position_size != 0)) {
                 ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                                "measured_js name and position vectors must have the same size");
+                                                "measured_js.position vector has wrong size");
                 m_crtk_node_found = false;
             }
         }
-        // velocity
+        // -- velocity
         {
             const size_t velocity_size = measured_js.velocity.size();
-            if (velocity_size == m_number_of_joints) {
-                m_measured_js.velocity.resize(m_number_of_joints);
-            } else if (velocity_size != 0) {
+            if ((velocity_size != m_number_of_joints)
+                && (velocity_size != 0)) {
                 ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                                "measured_js name and velocity vectors must have the same size");
+                                                "measured_js.velocity vector has wrong size");
                 m_crtk_node_found = false;
             }
         }
-        // effort
+        // -- effort
         {
             const size_t effort_size = measured_js.effort.size();
-            if (effort_size == m_number_of_joints) {
-                m_measured_js.effort.resize(m_number_of_joints);
-            } else if (effort_size != 0) {
+            if ((effort_size != m_number_of_joints)
+                && (effort_size != 0)) {
                 ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                                "measured_js name and effort vectors must have the same size");
+                                                "measured_js.effort vector has wrong size");
                 m_crtk_node_found = false;
             }
         }
-
         // copy joint state
-        if (!m_crtk_node_found) {
-            m_number_of_joints = 0;
-            m_measured_js.name.resize(0);
-            m_measured_js.position.resize(0);
-            m_measured_js.velocity.resize(0);
-            m_measured_js.effort.resize(0);
-        } else {
-            // register all interfaces for ros control
-            for (std::size_t i = 0; i < m_number_of_joints; ++i) {
-                ROS_DEBUG_STREAM_NAMED("crtk_hardware_interface",
-                                       "Loading joint name: " << m_measured_js.name[i]);
-
-                // create joint state interface
-                m_joint_state_interface
-                    .registerHandle(hardware_interface::JointStateHandle(m_measured_js.name[i],
-                                                                         &m_measured_js.position[i],
-                                                                         &m_measured_js.velocity[i],
-                                                                         &m_measured_js.effort[i]));
-
-                // create position joint interface
-                m_position_joint_interface
-                    .registerHandle(hardware_interface::JointHandle(m_joint_state_interface.getHandle(m_measured_js.name[i]),
-                                                                    &m_measured_js.position[i]));
-            }
-            registerInterface(&m_joint_state_interface);
-            registerInterface(&m_position_joint_interface);
-
-            // resize servo objects too
-            m_servo_jp.name.resize(m_number_of_joints);
-            m_servo_jp.position.resize(m_number_of_joints);
-            m_servo_jp.velocity.resize(0);
-            m_servo_jp.effort.resize(0);
-            // copy names only the first time, we don't support name/size change at runtime
-            std::copy(m_measured_js.name.begin(), m_measured_js.name.end(), m_servo_jp.name.begin());
-
-            // make the first copy from measured joint state
-            copy_measured_js_from_crtk_node(measured_js);
-        }
+        copy_measured_js_from_crtk_node(measured_js);
     }
 
     void crtkROSHardwareInterface::copy_measured_js_from_crtk_node(const sensor_msgs::JointState & measured_js)
@@ -126,7 +94,7 @@ namespace ros_control_crtk {
                               m_measured_js.position.begin());
                 } else {
                     ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                                    "measured_js name and position vectors must have the same size");
+                                                    "measured_js.position has wrong size");
                 }
             }
         }
@@ -139,7 +107,7 @@ namespace ros_control_crtk {
                               m_measured_js.velocity.begin());
                 } else {
                     ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                                    "measured_js name and velocity vectors must have the same size");
+                                                    "measured_js.velocity vector has wrong size");
                 }
             }
         }
@@ -152,7 +120,7 @@ namespace ros_control_crtk {
                               m_measured_js.effort.begin());
                 } else {
                     ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                                    "measured_js name and effort vectors must have the same size");
+                                                    "measured_js.effort vector has wrong size");
                 }
             }
         }
@@ -169,6 +137,50 @@ namespace ros_control_crtk {
 
         // add publishers to send servo commands to crtk node
         m_servo_jp_publisher = m_node_handle.advertise<sensor_msgs::JointState>("servo_jp", 1, false);
+        
+        m_number_of_joints = 6;
+        m_measured_js.name.resize(m_number_of_joints);
+        m_measured_js.name[0] = "outer_yaw";
+        m_measured_js.name[1] = "outer_pitch";
+        m_measured_js.name[2] = "outer_insertion";
+        m_measured_js.name[3] = "outer_roll";
+        m_measured_js.name[4] = "outer_wrist_pitch";
+        m_measured_js.name[5] = "outer_wrist_yaw";
+        m_measured_js.position.resize(m_number_of_joints);
+        m_measured_js.velocity.resize(m_number_of_joints);
+        m_measured_js.effort.resize(m_number_of_joints);
+
+        // resize servo objects too
+        m_servo_jp.name.resize(m_number_of_joints);
+        m_servo_jp.position.resize(m_number_of_joints);
+        m_servo_jp.velocity.resize(0);
+        m_servo_jp.effort.resize(0);
+        // copy names only the first time, we don't support name/size change at runtime
+        std::copy(m_measured_js.name.begin(), m_measured_js.name.end(), m_servo_jp.name.begin());
+
+        // register all interfaces for ros control
+        for (size_t i = 0;
+             i < m_number_of_joints;
+             ++i) {
+            ROS_DEBUG_STREAM_NAMED("crtk_hardware_interface",
+                                   "Loading joint name: " << m_measured_js.name[i]);
+
+            // create joint state interface
+            m_joint_state_interface
+                .registerHandle(hardware_interface::JointStateHandle(m_measured_js.name[i],
+                                                                     &m_measured_js.position[i],
+                                                                     &m_measured_js.velocity[i],
+                                                                     &m_measured_js.effort[i]));
+
+            // create position joint interface
+            m_position_joint_interface
+                .registerHandle(hardware_interface::JointHandle(m_joint_state_interface.getHandle(m_measured_js.name[i]),
+                                                                &m_servo_jp.position[i]));
+        }
+
+        // register ros control interfaces
+        registerInterface(&m_joint_state_interface);
+        registerInterface(&m_position_joint_interface);
     }
 
     void crtkROSHardwareInterface::read(void)
@@ -198,7 +210,7 @@ namespace ros_control_crtk {
          this->write();
 
             // there should be some kind of sleep here, maybe try to find frenquency of crtk node
-            ros::Duration(1.0).sleep();
+         ros::Duration(0.001).sleep();
         }
 
         delete cm;
@@ -217,12 +229,14 @@ namespace ros_control_crtk {
                               iter->type.c_str());
                     return false;
                 }
+#if 0
                 if (!m_crtk_node_found) {
                     ROS_ERROR("%s: can not switch to interface of that type (%s) as long as the crtk node is not found",
                               iter->name.c_str(),
                               iter->type.c_str());
                     return false;
                 }
+#endif
             }
         }
 
@@ -239,7 +253,7 @@ namespace ros_control_crtk {
              iter != stop_list.end();
              ++iter) {
             std::cerr << "To stop: " << iter->name << " of type " << iter->type << std::endl;
-            if (iter->name == "hardware_interface::PositionJointInterface") {
+            if (iter->name == "pos_based_pos_traj_controller") {
                 m_servo_jp_interface_running = false;
                 ROS_DEBUG("Stopping position interface");
             }
@@ -248,12 +262,14 @@ namespace ros_control_crtk {
              iter != start_list.end();
              ++iter) {
             std::cerr << "To start: " << iter->name << " of type " << iter->type << std::endl;
+#if 0
             if (!m_crtk_node_found) {
                 ROS_ERROR("%s: can not switch to interface of that type (%s) as long as the crtk node is not found",
                           iter->name.c_str(),
                           iter->type.c_str());
             }
-            if (iter->name == "hardware_interface::PositionJointInterface") {
+#endif
+            if (iter->name == "pos_based_pos_traj_controller") {
                 m_servo_jp_interface_running = true;
                 ROS_DEBUG("Starting position interface");
             }
