@@ -137,7 +137,7 @@ namespace ros_control_crtk {
 
         // add publishers to send servo commands to crtk node
         m_servo_jp_publisher = m_node_handle.advertise<sensor_msgs::JointState>("servo_jp", 1, false);
-        
+
         m_number_of_joints = 6;
         m_measured_js.name.resize(m_number_of_joints);
         m_measured_js.name[0] = "outer_yaw";
@@ -202,15 +202,15 @@ namespace ros_control_crtk {
             = new controller_manager::ControllerManager(this, m_node_handle);
 
         ros::Time previous_time = ros::Time::now();
-      while (ros::ok()) {
+        while (ros::ok()) {
             this->read();
-         ros::Time now = ros::Time::now();
-         cm->update(now, now - previous_time);
-         previous_time = now;
-         this->write();
+            ros::Time now = ros::Time::now();
+            cm->update(now, now - previous_time);
+            previous_time = now;
+            this->write();
 
-            // there should be some kind of sleep here, maybe try to find frenquency of crtk node
-         ros::Duration(0.001).sleep();
+            // there should be some kind of sleep here, maybe try to find frenquency of crtk node - load from rosparam!
+            ros::Duration(0.01).sleep();
         }
 
         delete cm;
