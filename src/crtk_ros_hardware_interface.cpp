@@ -13,6 +13,21 @@ namespace ros_control_crtk {
         ROS_INFO_NAMED("crtk_hardware_interface", "Loaded crtk_hardware_interface.");
     }
 
+    void crtkROSHardwareInterface::current_state_callback(const std_msgs::String & state)
+    {
+        if (state.data == "READY") {
+            m_crtk_node_ready = true;
+            // if the crtk node was found, set current servo_jp based on measured_js
+            if (m_crtk_node_found) {
+                std::copy(m_measured_js.position.begin(),
+                          m_measured_js.position.end(),
+                          m_servo_jp.position.begin());
+            }
+        } else {
+            m_crtk_node_ready = false;
+        }
+    }
+    
     void crtkROSHardwareInterface::measured_js_callback(const sensor_msgs::JointState & measured_js)
     {
         // check if we had already found the crtk controller
@@ -81,6 +96,9 @@ namespace ros_control_crtk {
         }
         // copy joint state
         copy_measured_js_from_crtk_node(measured_js);
+
+        // set initial values to send to robot based on current state
+        std::copy(m_measured_js.position.begin(), m_measured_js.position.end(), m_servo_jp.position.begin());
     }
 
     void crtkROSHardwareInterface::copy_measured_js_from_crtk_node(const sensor_msgs::JointState & measured_js)
@@ -129,7 +147,12 @@ namespace ros_control_crtk {
     void crtkROSHardwareInterface::init(void)
     {
         m_crtk_node_found = false;
+        m_crtk_node_ready = false;
         m_servo_jp_interface_running = false;
+
+        // add subscriber to current state from crtk node - this has to be standardized
+        m_current_state_subscriber = m_node_handle.subscribe("current_state", 1,
+                                                             &crtkROSHardwareInterface::current_state_callback, this);
 
         // add subscriber to get joint state from crtk node
         m_measured_js_subscriber = m_node_handle.subscribe("measured_js", 1,
@@ -192,7 +215,13 @@ namespace ros_control_crtk {
     void crtkROSHardwareInterface::write(void)
     {
         if (m_servo_jp_interface_running) {
-            std::cerr << "[" << m_measured_js.position[0] << "]";
+            if (m_crtk_node_ready) {
+                m_servo_jp_publisher.publish(m_servo_jp);
+                std::cerr << "[" << m_measured_js.position[2] << "]";
+            } else {
+                ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
+                                                "crtk node is not ready");
+            }
         }
     }
 
