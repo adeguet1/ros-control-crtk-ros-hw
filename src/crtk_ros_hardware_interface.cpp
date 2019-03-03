@@ -217,7 +217,9 @@ namespace ros_control_crtk {
         if (m_servo_jp_interface_running) {
             if (m_crtk_node_ready) {
                 m_servo_jp_publisher.publish(m_servo_jp);
-                std::cerr << "[" << m_measured_js.position[2] << "]";
+                if (m_servo_jp.position[0] != 0.0) {
+                    std::cerr << "[" << m_servo_jp.position[0] << "]";
+                }
             } else {
                 ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
                                                 "crtk node is not ready");
