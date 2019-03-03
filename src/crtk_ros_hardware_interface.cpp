@@ -216,13 +216,14 @@ namespace ros_control_crtk {
     {
         if (m_servo_jp_interface_running) {
             if (m_crtk_node_ready) {
-                m_servo_jp_publisher.publish(m_servo_jp);
+                // m_servo_jp_publisher.publish(m_servo_jp);
                 if (m_servo_jp.position[0] != 0.0) {
                     std::cerr << "[" << m_servo_jp.position[0] << "]";
+                    std::cerr << "Anton need to implement this, i.e publish positions to crtk node" << std::endl;
                 }
             } else {
-                ROS_ERROR_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
-                                                "crtk node is not ready");
+                ROS_WARN_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",
+                                               "crtk node is not ready");
             }
         }
     }
