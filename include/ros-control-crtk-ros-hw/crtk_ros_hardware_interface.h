@@ -12,6 +12,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/JointState.h>
+#include <crtk_msgs/operating_state.h>
 
 namespace ros_control_crtk {
 
@@ -36,7 +37,7 @@ namespace ros_control_crtk {
 
     protected:
         virtual void init(void);
-        void current_state_callback(const std_msgs::String & state);
+        void operating_state_callback(const crtk_msgs::operating_state & state);
         void measured_js_callback(const sensor_msgs::JointState & measured_js);
         virtual void initialize_from_crtk_node(const sensor_msgs::JointState & measured_js);
         virtual void copy_measured_js_from_crtk_node(const sensor_msgs::JointState & measured_js);

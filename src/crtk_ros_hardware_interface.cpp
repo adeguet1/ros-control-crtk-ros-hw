@@ -13,9 +13,9 @@ namespace ros_control_crtk {
         ROS_INFO_NAMED("crtk_hardware_interface", "Loaded crtk_hardware_interface.");
     }
 
-    void crtkROSHardwareInterface::current_state_callback(const std_msgs::String & state)
+    void crtkROSHardwareInterface::operating_state_callback(const crtk_msgs::operating_state & state)
     {
-        if (state.data == "READY") {
+        if (state.state == "ENABLED") {
             m_crtk_node_ready = true;
             // if the crtk node was found, set current servo_jp based on measured_js
             if (m_crtk_node_found) {
@@ -151,8 +151,8 @@ namespace ros_control_crtk {
         m_servo_jp_interface_running = false;
 
         // add subscriber to current state from crtk node - this has to be standardized
-        m_current_state_subscriber = m_node_handle.subscribe("current_state", 1,
-                                                             &crtkROSHardwareInterface::current_state_callback, this);
+        m_current_state_subscriber = m_node_handle.subscribe("operating_state", 1,
+                                                             &crtkROSHardwareInterface::operating_state_callback, this);
 
         // add subscriber to get joint state from crtk node
         m_measured_js_subscriber = m_node_handle.subscribe("measured_js", 1,
@@ -218,8 +218,7 @@ namespace ros_control_crtk {
             if (m_crtk_node_ready) {
                 // m_servo_jp_publisher.publish(m_servo_jp);
                 if (m_servo_jp.position[0] != 0.0) {
-                    std::cerr << "[" << m_servo_jp.position[0] << "]";
-                    std::cerr << "Anton need to implement this, i.e publish positions to crtk node" << std::endl;
+                    m_servo_jp_publisher.publish(m_servo_jp);
                 }
             } else {
                 ROS_WARN_STREAM_THROTTLE_NAMED(60, "crtk_hardware_interface",

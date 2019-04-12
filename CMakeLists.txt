@@ -19,7 +19,7 @@ find_package (catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   trajectory_msgs
-  tf
+  crtk_msgs
 )
 
 catkin_package (
@@ -33,6 +33,7 @@ catkin_package (
     roscpp
     sensor_msgs
     trajectory_msgs
+    crtk_msgs
 )
 
 ## Specify additional locations of header files
